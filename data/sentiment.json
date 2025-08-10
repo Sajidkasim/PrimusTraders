@@ -1,0 +1,24 @@
+
+{
+  "cot": {
+    "weekEnding": "(pending)",
+    "instrument": "NASDAQ-100 E-mini",
+    "source": "pending",
+    "rows": [
+      {"label":"Non-Comm Net","value":0,"prev":null,"max":80000},
+      {"label":"Non-Comm Long","value":0,"prev":null,"max":180000},
+      {"label":"Non-Comm Short","value":0,"prev":null,"max":180000}
+    ]
+  },
+  "aaii": {
+    "weekEnding": "(pending)",
+    "source": "manual",
+    "data": [
+      {"label":"Bullish","pct":0,"prev":0},
+      {"label":"Neutral","pct":0,"prev":0},
+      {"label":"Bearish","pct":0,"prev":0}
+    ]
+  },
+  "updated": "",
+  "version": 1
+}
