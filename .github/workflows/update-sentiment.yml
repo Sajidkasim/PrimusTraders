@@ -1,0 +1,38 @@
+name: Weekly sentiment build
+on:
+  schedule:
+    - cron: "15 21 * * 5"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate sentiment JSON
+        env:
+          BARCHART_API_KEY: ${{ secrets.BARCHART_API_KEY }}
+          AAII_BULLISH: "38.5"
+          AAII_BULLISH_PREV: "36.1"
+          AAII_NEUTRAL: "32.0"
+          AAII_NEUTRAL_PREV: "33.4"
+          AAII_BEARISH: "29.5"
+          AAII_BEARISH_PREV: "30.5"
+        run: node scripts/buildSentiment.js
+
+      - name: Commit & push if changed
+        run: |
+          if git diff --quiet; then
+            echo "No change to sentiment data."
+          else
+            git config user.name "github-actions"
+            git config user.email "actions@users.noreply.github.com"
+            git add data/sentiment.json
+            git commit -m "chore: weekly COT & AAII update"
+            git push
+          fi
