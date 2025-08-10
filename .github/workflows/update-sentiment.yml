@@ -1,7 +1,7 @@
 name: Weekly sentiment build
 on:
   schedule:
-    - cron: "15 21 * * 5"
+    - cron: "15 21 * * 5"   # Friday 21:15 UTC
   workflow_dispatch:
 
 jobs:
@@ -16,7 +16,6 @@ jobs:
 
       - name: Generate sentiment JSON
         env:
-          BARCHART_API_KEY: ${{ secrets.BARCHART_API_KEY }}
           AAII_BULLISH: "38.5"
           AAII_BULLISH_PREV: "36.1"
           AAII_NEUTRAL: "32.0"
