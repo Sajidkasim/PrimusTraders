@@ -2,11 +2,7 @@ import fs from 'fs';
 import https from 'https';
 
 const OUT_PATH = 'data/sentiment.json';
-
-// Market identifier substring (as it appears in FinFutWk.txt)
 const TARGET_SUBSTRING = 'E-MINI NASDAQ-100 STOCK INDEX';
-
-// URL of current Financial Futures (legacy style) weekly report
 const CFTC_URL = 'https://www.cftc.gov/dea/newcot/FinFutWk.txt';
 
 function fetchText(url){
@@ -29,13 +25,11 @@ function toNumber(s){
   return isFinite(n) ? n : 0;
 }
 
-// Convert MM/DD/YY or MM/DD/YYYY to YYYY-MM-DD
 function toISO(md){
   if(!/^\d{2}\/\d{2}\/\d{2,4}$/.test(md)) return md;
   const [m,d,yRaw] = md.split('/');
   let y = yRaw;
   if(y.length === 2){
-    // Assume 20xx for current era
     const yr = Number(y);
     y = (yr > 70 ? '19' : '20') + y;
   }
@@ -43,20 +37,9 @@ function toISO(md){
 }
 
 function extractRow(lines){
-  // Each data line uses variable-width spaces (2+ spaces between columns).
-  // We look for the line containing TARGET_SUBSTRING and then split on 2+ spaces.
   for(const line of lines){
     if(!line.includes(TARGET_SUBSTRING)) continue;
-    // Skip header / blank lines
     const parts = line.trim().split(/\s{2,}/);
-    // Expected minimal structure:
-    // 0: Market + Exchange
-    // 1: Report Date (MM/DD/YY)
-    // 2: Non-Comm Long
-    // 3: Non-Comm Short
-    // 4: Non-Comm Spreading
-    // 5: Comm Long
-    // 6: Comm Short
     if(parts.length < 5) continue;
     const market = parts[0];
     const reportDate = toISO(parts[1]);
@@ -76,7 +59,6 @@ async function main(){
 
   const net = row.nonCommLong - row.nonCommShort;
 
-  // Previous-week values only if report date advanced
   let prevLong=null, prevShort=null, prevNet=null;
   if(prev?.cot?.weekEnding && prev.cot.weekEnding !== row.reportDate){
     for(const r of prev.cot.rows){
@@ -89,7 +71,7 @@ async function main(){
   const cot = {
     weekEnding: row.reportDate,
     source: 'cftc-direct',
-    instrument: row.market, // Full official line; you can shorten later in front-end if desired
+    instrument: row.market,
     rows: [
       {label:'Non-Comm Net', value:net, prev:prevNet, max:80000},
       {label:'Non-Comm Long', value:row.nonCommLong, prev:prevLong, max:180000},
@@ -97,7 +79,6 @@ async function main(){
     ]
   };
 
-  // AAII still manual (env values may be undefined -> default 0)
   const aaii = {
     weekEnding: row.reportDate,
     source: 'manual',
