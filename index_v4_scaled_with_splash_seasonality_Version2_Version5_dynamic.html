@@ -379,14 +379,14 @@ body.splash-lock{overflow:hidden;height:100vh}
             <option>Macro</option><option>Risk</option><option>Structure</option>
             <option>Psychology</option><option>Process</option>
           </select>
-          <select name="sentiment" required>
-            <option value="">Sentiment (1‑5)</option>
-            <option value="1">1 - Stressed</option>
-            <option value="2">2 - Cautious</option>
-            <option value="3">3 - Neutral</option>
-            <option value="4">4 - Focused</option>
-            <option value="5">5 - Optimal</option>
-          </select>
+            <select name="sentiment" required>
+              <option value="">Sentiment (1‑5)</option>
+              <option value="1">1 - Stressed</option>
+              <option value="2">2 - Cautious</option>
+              <option value="3">3 - Neutral</option>
+              <option value="4">4 - Focused</option>
+              <option value="5">5 - Optimal</option>
+            </select>
         </div>
         <textarea name="body" required maxlength="420" placeholder="Insight / scenario / reflection..."></textarea>
         <div class="char-counter" id="charCounter">0 / 420</div>
@@ -545,30 +545,7 @@ function buildCalendar(){
 document.addEventListener('DOMContentLoaded',buildCalendar);
 
 /* ========= Positioning & Sentiment (Dynamic Fetch) =========
-   We fetch JSON from either:
-   1. /data/sentiment.json (static weekly file committed by automation)
-   2. fallback endpoint /api/positioning (serverless / backend) if static not found
-   3. fallback to previously stored localStorage snapshot or sample.
-
-   Expected JSON shape:
-   {
-     "cot":{
-        "weekEnding":"YYYY-MM-DD",
-        "rows":[
-          {"label":"Non-Comm Net","value":123,"prev":120,"max":80000},
-          ...
-        ]
-     },
-     "aaii":{
-        "weekEnding":"YYYY-MM-DD",
-        "data":[
-          {"label":"Bullish","pct":38.5,"prev":36.1},
-          {"label":"Neutral","pct":32.0,"prev":33.4},
-          {"label":"Bearish","pct":29.5,"prev":30.5}
-        ]
-     },
-     "updated":"ISODate"
-   }
+   Modified to allow COT-only (AAII optional). sentiment.json currently supplies only COT.
 */
 const SENT_KEY='primus_sentiment_cache_v1';
 
@@ -626,12 +603,11 @@ function renderAAII(aaii){
 
 async function fetchSentiment(){
  const endpoints=[
-   '/data/sentiment.json', // static (preferred if deployed)
-   '/api/positioning'      // dynamic backend
+   'data/sentiment.json', // MODIFIED: relative path without leading slash to work on GitHub Pages
  ];
  for(const url of endpoints){
   try{
-    const res=await fetch(url,{cache:'no-store'});
+    const res=await fetch(url+'?ts='+Date.now(),{cache:'no-store'});
     if(res.ok){
       const json=await res.json();
       return json;
@@ -642,37 +618,32 @@ async function fetchSentiment(){
 }
 
 function applySentiment(json, persist=true){
- if(!json||!json.cot||!json.aaii) return;
+ // MODIFIED: only require json.cot; aaii optional
+ if(!json || !json.cot) return;
  renderCOT(json.cot);
- renderAAII(json.aaii);
+ if(json.aaii){ // present
+   renderAAII(json.aaii);
+ } else {
+   // Hide AAII block until implemented
+   const aaiiBlock=qs('#aaiiBlock');
+   if(aaiiBlock) aaiiBlock.style.display='none';
+ }
  if(persist) storage.write(SENT_KEY,json);
 }
 
 async function initSentiment(){
- // 1. Use cached (instant) while fetching new
  const cached=storage.read(SENT_KEY,null);
  if(cached){applySentiment(cached,false);}
- // 2. Fetch live
  const fresh=await fetchSentiment();
  if(fresh){applySentiment(fresh);}
  else if(!cached){
-   // Absolute fallback sample (so section isn't empty on first load)
    applySentiment({
      cot:{
        weekEnding:"(sample)",
        rows:[
          {label:"Non-Comm Net",value:48000,prev:45500,max:80000},
-         {label:"Comm Net",value:-51000,prev:-50000,max:80000},
          {label:"Non-Comm Long",value:123000,prev:122000,max:180000},
          {label:"Non-Comm Short",value:75000,prev:76500,max:180000}
-       ]
-     },
-     aaii:{
-       weekEnding:"(sample)",
-       data:[
-         {label:"Bullish",pct:38.5,prev:36.1},
-         {label:"Neutral",pct:32.0,prev:33.4},
-         {label:"Bearish",pct:29.5,prev:30.5}
        ]
      }
    },false);
