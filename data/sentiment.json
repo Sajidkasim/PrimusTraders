@@ -1,24 +1,50 @@
-
 {
   "cot": {
-    "weekEnding": "(pending)",
-    "instrument": "NASDAQ-100 E-mini",
-    "source": "pending",
+    "weekEnding": "2025-08-05",
+    "source": "cftc-direct",
+    "instrument": "NASDAQ MINI - CHICAGO MERCANTILE EXCHANGE",
     "rows": [
-      {"label":"Non-Comm Net","value":0,"prev":null,"max":80000},
-      {"label":"Non-Comm Long","value":0,"prev":null,"max":180000},
-      {"label":"Non-Comm Short","value":0,"prev":null,"max":180000}
+      {
+        "label": "Non-Comm Net",
+        "value": -81241,
+        "prev": 0,
+        "max": 500000
+      },
+      {
+        "label": "Non-Comm Long",
+        "value": 45337,
+        "prev": 0,
+        "max": 600000
+      },
+      {
+        "label": "Non-Comm Short",
+        "value": 126578,
+        "prev": 0,
+        "max": 600000
+      }
     ]
   },
   "aaii": {
-    "weekEnding": "(pending)",
+    "weekEnding": "2025-08-05",
     "source": "manual",
     "data": [
-      {"label":"Bullish","pct":0,"prev":0},
-      {"label":"Neutral","pct":0,"prev":0},
-      {"label":"Bearish","pct":0,"prev":0}
+      {
+        "label": "Bullish",
+        "pct": 38.5,
+        "prev": 36.1
+      },
+      {
+        "label": "Neutral",
+        "pct": 32,
+        "prev": 33.4
+      },
+      {
+        "label": "Bearish",
+        "pct": 29.5,
+        "prev": 30.5
+      }
     ]
   },
-  "updated": "",
+  "updated": "2025-08-10T13:08:51.931Z",
   "version": 1
 }
